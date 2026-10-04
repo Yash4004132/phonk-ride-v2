@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#070a0d" />
+    <meta name="description" content="PHONK RIDE - a neon rhythm drift game." />
+    <title>PHONK RIDE // Drift</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-lockup">
+          <span class="brand-mark" aria-hidden="true">PR</span>
+          <div>
+            <p class="eyebrow">NIGHT SHIFT / 06</p>
+            <h1>PHONK <span>RIDE</span></h1>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button class="profile-button" id="openProfileButton" type="button" aria-label="Open rider profile">
+            <span class="profile-mini-avatar" aria-hidden="true">NR</span>
+            <span class="button-label">PROFILE</span>
+          </button>
+          <button class="icon-button" id="soundToggle" type="button" aria-label="Turn sound off" aria-pressed="true">
+            <span class="sound-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+            <span class="button-label">SOUND</span>
+          </button>
+        </div>
+      </header>
+
+      <main id="gameView" hidden>
+        <section class="status-row" aria-label="Run status">
+          <div class="status-block">
+            <span class="status-label">PLAY CREDITS</span>
+            <strong id="balanceValue">200</strong>
+          </div>
+          <div class="credit-actions">
+            <button class="credit-button" id="openPaymentButton" type="button">
+              <span aria-hidden="true">+</span> ADD CREDITS
+            </button>
+            <button class="credit-button withdraw-credit-button" id="openWithdrawButton" type="button">
+              <span aria-hidden="true">↗</span> WITHDRAW
+            </button>
+          </div>
+          <div class="status-block status-right">
+            <span class="status-label">MULTIPLIER</span>
+            <strong class="accent-text" id="multiplierValue">x1.0</strong>
+          </div>
+        </section>
+
+        <section class="game-card" aria-label="Drift track">
+          <div class="card-topline">
+            <span class="live-dot"><i></i> CONTINUOUS RIDE</span>
+            <span id="runNumber">RUN 001</span>
+          </div>
+          <div class="prompt-block">
+            <p class="prompt-kicker" id="promptKicker">PRESS TO START THE RIDE</p>
+            <h2 id="promptTitle">START THE<br /><em>RACE</em></h2>
+          </div>
+          <canvas id="trackCanvas" aria-label="Animated neon drift track"></canvas>
+          <div class="canvas-overlay">
+            <span class="lane-tag lane-tag-left">L / CYAN</span>
+            <span class="lane-tag lane-tag-right">R / PINK</span>
+            <span class="move-counter" id="moveCounter">5 MOVES TO WIN</span>
+            <span class="timer-readout" id="timerReadout">READY</span>
+          </div>
+          <div class="result-stamp" id="resultStamp" aria-live="polite"></div>
+        </section>
+
+        <section class="control-panel" aria-label="Drift controls">
+          <div class="bet-row">
+            <div class="bet-copy">
+              <span class="bet-label">RISK TIER</span>
+              <small id="betHint">BET 5X // 50 CREDITS // SPEED 1.0X // 5 MOVES</small>
+            </div>
+            <div class="bet-options" role="group" aria-label="Choose bet tier">
+              <button class="bet-button is-active" data-bet="5" type="button" aria-pressed="true">5X</button>
+              <button class="bet-button" data-bet="10" type="button" aria-pressed="false">10X</button>
+              <button class="bet-button" data-bet="20" type="button" aria-pressed="false">20X</button>
+            </div>
+          </div>
+          <div class="lane-actions">
+            <button class="lane-button lane-left" data-lane="left" type="button">
+              <span class="lane-key">A</span>
+              <span class="lane-button-copy"><b>LEFT DRIFT</b><small>CYAN LINE</small></span>
+              <span class="lane-arrow" aria-hidden="true">↙</span>
+            </button>
+            <button class="ready-button" id="readyButton" type="button">READY</button>
+            <button class="lane-button lane-right" data-lane="right" type="button">
+              <span class="lane-key">D</span>
+              <span class="lane-button-copy"><b>RIGHT DRIFT</b><small>PINK LINE</small></span>
+              <span class="lane-arrow" aria-hidden="true">↘</span>
+            </button>
+          </div>
+          <div class="micro-row">
+            <span><i class="pulse-dot"></i><span id="statusText">SYSTEM READY</span></span>
+            <span class="micro-divider"></span>
+            <span>PHONK LOOP // 120 BPM</span>
+          </div>
+        </section>
+
+        <section class="run-footer">
+          <div class="streak-track">
+            <div class="streak-copy"><span>STREAK</span><b id="streakValue">00</b></div>
+            <div class="streak-meter"><span id="streakMeter"></span></div>
+          </div>
+          <button class="reset-button" id="resetButton" type="button"><span aria-hidden="true">↻</span> RESET RUN</button>
+        </section>
+      </main>
+
+      <section class="payment-page" id="paymentChoicePage" hidden aria-labelledby="paymentChoiceTitle">
+        <div class="payment-topline">
+          <button class="back-button" id="backToRideFromChoice" type="button"><span aria-hidden="true">←</span> BACK TO RIDE</button>
+          <span>SECURE TOP-UP</span>
+        </div>
+
+        <div class="payment-heading">
+          <p class="prompt-kicker">PAYMENT TYPE</p>
+          <h2 id="paymentChoiceTitle">CHOOSE<br /><em>MODE</em></h2>
+          <p>Select your payment method before entering the payment details.</p>
+        </div>
+
+        <div class="payment-layout">
+          <div class="pack-section">
+            <div class="section-label-row"><span>SELECT METHOD</span><span>INDIAN / FOREIGN</span></div>
+            <div class="currency-row pack-select-row" style="justify-content:center; padding-top:16px;">
+              <div class="currency-switch" role="group" aria-label="Choose payment country">
+                <button class="currency-button is-selected" id="paymentChoiceIndianButton" type="button" data-method="indian" aria-pressed="true">INDIAN</button>
+                <button class="currency-button" id="paymentChoiceForeignButton" type="button" data-method="foreign" aria-pressed="false">FOREIGN</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="payment-page" id="paymentPage" hidden aria-labelledby="paymentTitle">
+        <div class="payment-topline">
+          <button class="back-button" id="backToRide" type="button"><span aria-hidden="true">←</span> BACK TO RIDE</button>
+          <span>SECURE TOP-UP</span>
+        </div>
+
+        <div class="payment-heading">
+          <p class="prompt-kicker">PAYMENT TERMINAL</p>
+          <h2 id="paymentTitle">FUEL THE<br /><em>RIDE</em></h2>
+          <p>Choose a credit pack and keep your next run moving.</p>
+        </div>
+
+        <div class="payment-balance">
+          <span>AVAILABLE CREDITS</span>
+          <strong id="paymentBalanceValue">200</strong>
+        </div>
+
+        <div class="payment-layout">
+          <div class="pack-section">
+            <div class="section-label-row"><span>SELECT PACK</span><span id="priceModeLabel">INDIAN // INR</span></div>
+            <div class="currency-row pack-select-row">
+              <span class="rate-status" id="rateStatus">LOCAL PRICE // INR</span>
+            </div>
+            <div class="pack-options" role="group" aria-label="Choose a credit pack">
+              <button class="credit-pack is-selected" type="button" data-pack="basic" data-inr-credits="200" data-usd-credits="250" data-inr="200" data-usd="5" aria-pressed="true">
+                <span class="pack-credits">200</span><span class="pack-unit">CREDITS</span><span class="pack-price">INR 200</span>
+              </button>
+              <button class="credit-pack" type="button" data-pack="standard" data-inr-credits="400" data-usd-credits="500" data-inr="400" data-usd="10" aria-pressed="false">
+                <span class="pack-badge">MOST PLAYED</span><span class="pack-credits">400</span><span class="pack-unit">CREDITS</span><span class="pack-price">INR 400</span>
+              </button>
+              <button class="credit-pack" type="button" data-pack="premium" data-inr-credits="600" data-usd-credits="750" data-inr="600" data-usd="20" aria-pressed="false">
+                <span class="pack-credits">600</span><span class="pack-unit">CREDITS</span><span class="pack-price">INR 600</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="checkout-panel crypto-panel">
+            <div class="section-label-row"><span>PAYMENT METHOD</span><span>UPI / CRYPTO</span></div>
+
+            <div id="indianPaymentPanel" class="payment-method-panel">
+              <div class="crypto-payment indian-payment-layout">
+                <div class="qr-frame">
+                  <img src="indian-qr.jpeg" alt="QR code for Indian UPI payment" />
+                </div>
+                <div class="crypto-copy">
+                  <span class="wallet-network">UPI PAYMENT</span>
+                  <h3>INDIAN MODE</h3>
+                  <p>Scan the QR and pay using UPI, then paste the UPI transaction ID below.</p>
+                  <div class="utr-field">
+                    <label for="indianUpiInput">UPI ID / REFERENCE <span>REQUIRED</span></label>
+                    <input id="indianUpiInput" type="text" placeholder="ENTER YOUR UPI ID OR REFERENCE" autocomplete="off" spellcheck="false" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="foreignPaymentPanel" class="payment-method-panel" hidden>
+              <div class="crypto-payment">
+                <div class="qr-frame">
+                  <img src="wallet-qr.jpeg" alt="QR code for the PHONK RIDE crypto wallet" />
+                </div>
+                <div class="crypto-copy">
+                  <span class="wallet-network">SOLANA NETWORK</span>
+                  <h3>CRYPTO WALLET</h3>
+                  <p>Send the exact selected amount, then keep your transaction receipt.</p>
+                  <div class="wallet-address-row">
+                    <code id="walletAddress">ByeKyrRYoUkj2RJx8KXhizVhiYfuuCyFZvSx3foxqwd5</code>
+                    <button class="copy-button" id="copyWalletButton" type="button">COPY</button>
+                  </div>
+                  <button class="scan-button" id="scanQrButton" type="button"><span aria-hidden="true">▣</span> SCAN QR FROM DEVICE</button>
+                  <input id="qrFileInput" type="file" accept="image/*" capture="environment" hidden />
+                  <p class="scan-status" id="scanStatus">QR SCANNER READY // CAMERA OR IMAGE</p>
+                </div>
+              </div>
+              <div class="utr-field">
+                <label for="utrInput">UTR / TX SIGNATURE <span>REQUIRED</span></label>
+                <input id="utrInput" type="text" placeholder="ENTER SOLANA TRANSACTION SIGNATURE" autocomplete="off" spellcheck="false" />
+              </div>
+            </div>
+
+            <div class="payment-summary">
+              <span><b id="summaryCredits">200 CREDITS</b><small>EXACT AMOUNT REQUIRED</small></span>
+              <strong id="summaryPrice">INR 200</strong>
+            </div>
+            <button class="pay-button" id="payButton" type="button">I HAVE SENT THE PAYMENT <span aria-hidden="true">↗</span></button>
+            <p class="payment-note" id="paymentStatus">VERIFY THE WALLET BEFORE SENDING</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="withdraw-page" id="withdrawPage" hidden aria-labelledby="withdrawTitle">
+        <div class="payment-topline">
+          <button class="back-button" id="backToRideFromWithdraw" type="button"><span aria-hidden="true">←</span> BACK TO RIDE</button>
+          <span>WITHDRAWAL REQUEST</span>
+        </div>
+
+        <div class="payment-heading">
+          <p class="prompt-kicker">PAYOUT TERMINAL</p>
+          <h2 id="withdrawTitle">EXIT THE<br /><em>RIDE</em></h2>
+          <p>Request a credit payout to your Solana wallet.</p>
+        </div>
+
+        <div class="payment-balance">
+          <span>AVAILABLE CREDITS</span>
+          <strong id="withdrawBalanceValue">200</strong>
+        </div>
+
+        <div class="withdraw-layout">
+          <div class="checkout-panel withdraw-panel">
+            <div class="section-label-row"><span>PAYOUT DETAILS</span><span>UPI / USDT</span></div>
+            <div class="currency-switch withdraw-mode-switch" role="group" aria-label="Choose payout method">
+              <button class="currency-button is-selected" id="indianPayoutButton" type="button" data-method="indian" aria-pressed="true">INDIAN</button>
+              <button class="currency-button" id="foreignPayoutButton" type="button" data-method="foreign" aria-pressed="false">FOREIGN</button>
+            </div>
+            <div class="withdraw-field withdraw-mode-field is-visible" id="indianPayoutField">
+              <label for="withdrawUpiInput">UPI ID <span>REQUIRED</span></label>
+              <input id="withdrawUpiInput" type="text" placeholder="ENTER YOUR UPI ID (name@upi)" autocomplete="off" spellcheck="false" />
+            </div>
+            <div class="withdraw-field withdraw-mode-field" id="foreignPayoutField" hidden>
+              <label for="withdrawWalletInput">DESTINATION WALLET <span>REQUIRED</span></label>
+              <input id="withdrawWalletInput" type="text" placeholder="ENTER YOUR SOLANA WALLET" autocomplete="off" spellcheck="false" />
+            </div>
+            <div class="withdraw-field">
+              <label for="withdrawAmountInput">WITHDRAW AMOUNT <span>MIN 10,000 CREDITS</span></label>
+              <input id="withdrawAmountInput" type="number" min="10000" step="1" inputmode="numeric" placeholder="MINIMUM 10,000" autocomplete="off" />
+            </div>
+            <div class="withdraw-summary">
+              <span><b id="withdrawSummaryCredits">0 CREDITS</b><small>REQUESTED PAYOUT</small></span>
+              <strong id="withdrawEstimatedValue">0.00 USDT</strong>
+            </div>
+            <button class="pay-button withdraw-submit-button" id="withdrawSubmitButton" type="button">REQUEST WITHDRAWAL <span aria-hidden="true">↗</span></button>
+            <p class="payment-note" id="withdrawStatus">REQUEST // MANUAL REVIEW // NO AUTO TRANSFER</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="profile-page" id="profilePage" hidden aria-labelledby="profileTitle">
+        <div class="payment-topline">
+          <button class="back-button" id="backToRideFromProfile" type="button"><span aria-hidden="true">←</span> BACK TO RIDE</button>
+          <span>RIDER SYSTEM // ACTIVE</span>
+        </div>
+
+        <div class="profile-heading">
+          <p class="prompt-kicker">RIDER PROFILE</p>
+          <h2 id="profileTitle">YOUR<br /><em>RUN</em></h2>
+          <p>Track the rhythm, keep the line clean.</p>
+        </div>
+
+        <div class="profile-identity">
+          <div class="profile-avatar" id="profileAvatar" aria-hidden="true">NR</div>
+          <div class="profile-identity-copy">
+            <span class="wallet-network" id="profileRiderId">RIDER ID // OFFLINE</span>
+            <h3 id="profileNameDisplay">NIGHT RIDER</h3>
+            <p class="profile-phone-display" id="profilePhoneDisplay">PHONE // NOT SET</p>
+            <p id="profileStatus">ONLINE // READY FOR THE NEXT RUN</p>
+          </div>
+          <span class="profile-online-dot" aria-label="Profile online"></span>
+        </div>
+
+        <div class="profile-name-editor">
+          <label for="profileNameInput">RIDER NAME</label>
+          <div class="profile-name-row">
+            <input id="profileNameInput" type="text" value="NIGHT RIDER" placeholder="NIGHT RIDER" maxlength="18" autocomplete="nickname" spellcheck="false" />
+          </div>
+          <label for="profilePhoneInput">PHONE NO. // WORLDWIDE</label>
+          <div class="profile-name-row">
+            <input id="profilePhoneInput" type="tel" value="" placeholder="+91 98765 43210" maxlength="20" autocomplete="tel" spellcheck="false" />
+            <button class="profile-save-button" id="saveProfileButton" type="button">SAVE</button>
+          </div>
+          <small id="profileSaveStatus">LOCAL PROFILE // READY</small>
+        </div>
+
+        <div class="profile-stat-grid" aria-label="Rider statistics">
+          <div class="profile-stat"><span>PLAY CREDITS</span><strong id="profileBalanceValue">200</strong><small>AVAILABLE NOW</small></div>
+          <div class="profile-stat"><span>RUNS</span><strong id="profileRunsValue">000</strong><small>TOTAL STARTED</small></div>
+          <div class="profile-stat"><span>CLEAN RUNS</span><strong id="profileWinsValue">000</strong><small>TIERS COMPLETE</small></div>
+          <div class="profile-stat"><span>BEST STREAK</span><strong id="profileStreakValue">00</strong><small>CONSECUTIVE</small></div>
+        </div>
+
+        <div class="profile-loadout">
+          <div class="section-label-row"><span>ACTIVE LOADOUT</span><span id="profileTierLabel">5X TIER</span></div>
+          <div class="loadout-grid">
+            <div><span>RISK</span><strong id="profileRiskValue">5X</strong></div>
+            <div><span>SPEED</span><strong id="profileSpeedValue">1.0X</strong></div>
+            <div><span>GOAL</span><strong id="profileMovesValue">5 MOVES</strong></div>
+          </div>
+        </div>
+
+        <div class="profile-actions">
+          <div class="profile-action-buttons">
+            <button class="profile-credit-button" id="profileAddCreditsButton" type="button"><span aria-hidden="true">+</span> ADD CREDITS</button>
+            <button class="profile-credit-button profile-withdraw-button" id="profileWithdrawButton" type="button"><span aria-hidden="true">↗</span> WITHDRAW</button>
+          </div>
+          <div class="profile-action-links">
+            <span id="profileWinRate">WIN RATE // 0%</span>
+            <button class="profile-logout-button" id="logoutButton" type="button">LOG OUT</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="auth-page" id="authPage" aria-labelledby="authTitle">
+        <div class="auth-heading">
+          <p class="prompt-kicker">RIDER ACCESS</p>
+          <h2 id="authTitle">ENTER THE<br /><em>RIDE</em></h2>
+          <p>Sign in to restore your credits, phone number and run history.</p>
+        </div>
+
+        <form class="auth-panel" id="authForm">
+          <div class="auth-mode-switch" role="group" aria-label="Choose account action">
+            <button class="auth-mode-button is-selected" id="signInModeButton" type="button" aria-pressed="true">SIGN IN</button>
+            <button class="auth-mode-button" id="registerModeButton" type="button" aria-pressed="false">CREATE ID</button>
+          </div>
+          <label class="auth-field">
+            <span>RIDER ID</span>
+            <input id="authRiderIdInput" type="text" placeholder="NIGHT.RIDER" maxlength="32" autocomplete="username" spellcheck="false" required />
+          </label>
+          <label class="auth-field" id="authNameField" hidden>
+            <span>RIDER NAME</span>
+            <input id="authNameInput" type="text" placeholder="NIGHT RIDER" maxlength="18" autocomplete="nickname" spellcheck="false" />
+          </label>
+          <label class="auth-field" id="authPhoneField" hidden>
+            <span>PHONE NO. // WORLDWIDE</span>
+            <input id="authPhoneInput" type="tel" placeholder="+91 98765 43210" maxlength="20" autocomplete="tel" spellcheck="false" />
+          </label>
+          <label class="auth-field">
+            <span>ACCESS CODE</span>
+            <input id="authPasswordInput" type="password" placeholder="6+ CHARACTERS" minlength="6" maxlength="72" autocomplete="current-password" required />
+          </label>
+          <button class="auth-submit-button" id="authSubmitButton" type="submit">SIGN IN <span aria-hidden="true">↗</span></button>
+          <p class="auth-note" id="authStatus">ACCOUNT REQUIRED // YOUR DATA WILL BE RESTORED ON LOGIN</p>
+        </form>
+      </section>
+    </div>
+    <script src="payout-estimate.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
